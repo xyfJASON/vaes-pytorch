@@ -1,0 +1,48 @@
+seed: 8888
+
+data:
+  target: datasets.celeba.CelebA
+  params:
+    root: ~/data/CelebA/
+    img_size: 64
+    split: train
+
+dataloader:
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+
+encoder:
+  target: models.simple_cnn.Encoder
+  params:
+    z_dim: 128
+    in_dim: 3
+    dim: 64
+    dim_mults: [1, 2, 4, 8]
+    with_bn: true
+
+decoder:
+  target: models.simple_cnn.Decoder
+  params:
+    z_dim: 128
+    dim: 64
+    dim_mults: [8, 4, 2, 1]
+    out_dim: 3
+    with_bn: true
+    with_tanh: true
+
+train:
+  n_steps: 150000
+  batch_size: 256
+  resume: ~
+  print_freq: 100
+  sample_freq: 1000
+  save_freq: 10000
+  n_samples: 64
+
+  coef_kl: 1.0
+
+  optim:
+    target: torch.optim.Adam
+    params:
+      lr: 0.02
