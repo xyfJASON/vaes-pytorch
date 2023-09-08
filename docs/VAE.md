@@ -31,17 +31,21 @@ accelerate-launch train.py -c ./configs/vae-celeba.yaml
 ```shell
 python sample.py -c CONFIG \
                  [--seed SEED] \
-                 [--mode {sample,interpolate}] \
+                 [--mode {sample,interpolate,traverse}] \
                  --weights WEIGHTS \
                  --n_samples N_SAMPLES \
                  --save_dir SAVE_DIR \
                  [--batch_size BATCH_SIZE] \
-                 [--n_interpolate N_INTERPOLATE]
+                 [--n_interpolate N_INTERPOLATE] \
+                 [--n_traverse N_TRAVERSE] \
+                 [--traverse_range TRAVERSE_RANGE] 
+                 [--traverse_dim TRAVERSE_DIM]
 ```
 
 - Choose a sampling mode by `--mode MODE`, the options are:
-  - `sample` (default): randomly sample images
-  - `interpolate`: sample two random images and interpolate between them. Use `--n_interpolate` to specify the number of images in between.
+  - `sample` (default): Randomly sample images.
+  - `interpolate`: Sample two random images and interpolate between them. Use `--n_interpolate` to specify the number of images in between.
+  - `traverse`: Traverse along a specific dimension. Use `--n_traverse` to specify the number of traversed images, `--traverse_range` to specify the traversal range and `--traverse_dim` to specify the traversal dimension.
 
 <br/>
 
@@ -53,10 +57,19 @@ python sample.py -c CONFIG \
 
 ### CelebA (64x64)
 
+**Random samples**:
+
 <p align="center">
   <img src="../assets/vae-celeba.png" width=30% />
 </p>
+
+**Interpolation**:
+
 <p align="center">
   <img src="../assets/vae-celeba-interpolate.png" width=60% />
 </p>
+**Traversal**:
 
+<p align="center">
+  <img src="../assets/vae-celeba-traverse.png" width=70% />
+</p>

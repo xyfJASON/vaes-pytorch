@@ -23,7 +23,8 @@ def get_parser():
         help='Set random seed',
     )
     parser.add_argument(
-        '--mode', type=str, default='sample', choices=['sample', 'interpolate'],
+        '--mode', type=str, default='sample',
+        choices=['sample', 'interpolate', 'traverse'],
         help='Choose a sample mode',
     )
     parser.add_argument(
@@ -45,6 +46,18 @@ def get_parser():
     parser.add_argument(
         '--n_interpolate', type=int, default=15,
         help='Number of intermidiate images when mode is interpolate',
+    )
+    parser.add_argument(
+        '--n_traverse', type=int, default=15,
+        help='Number of traversed images when mode is traverse',
+    )
+    parser.add_argument(
+        '--traverse_range', type=float, default=3,
+        help='Traversal range when mode is traverse',
+    )
+    parser.add_argument(
+        '--traverse_dim', type=int, default=0,
+        help='Traversal dimension when mode is traverse',
     )
     return parser
 
@@ -129,15 +142,38 @@ def main():
                 )
                 idx += 1
 
+    @accelerator.on_main_process
+    @torch.no_grad()
+    def traverse():
+        idx = 0
+        os.makedirs(args.save_dir, exist_ok=True)
+        folds = amortize(args.n_samples, args.batch_size)
+        for bs in tqdm.tqdm(folds):
+            z = torch.randn((bs, 1, conf.encoder.params.z_dim), device=device).repeat(1, args.n_traverse, 1)
+            z[:, :, args.traverse_dim] = torch.linspace(
+                -args.traverse_range, args.traverse_range, args.n_traverse, device=device,
+            ).unsqueeze(0)
+            z = z.reshape(-1, conf.encoder.params.z_dim)  # [bs * n_traverse, z_dim]
+            samples = decoder(z).cpu()
+            samples = samples.reshape(bs, args.n_traverse, *samples.shape[1:])
+            for x in samples:
+                save_image(
+                    x, os.path.join(args.save_dir, f'{idx}.png'),
+                    nrow=len(x), normalize=True, range=(-1, 1),
+                )
+                idx += 1
+
     # START SAMPLING
     logger.info('Start sampling...')
     if args.mode == 'sample':
         sample()
     elif args.mode == 'interpolate':
         interpolate()
+    elif args.mode == 'traverse':
+        traverse()
     else:
         raise ValueError(f'Unknown sample mode: {args.mode}')
-    logger.info(f'Sampled images are saved to: {args.save_dir}')
+    logger.info(f'Sampled images are saved to {args.save_dir}')
     logger.info('End of sampling')
 
 
