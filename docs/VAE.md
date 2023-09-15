@@ -9,7 +9,7 @@
 ## Training
 
 ```shell
-accelerate-launch train.py [-c CONFIG] [-e EXP_DIR] [--xxx.yyy zzz ...]
+accelerate-launch train_vae.py [-c CONFIG] [-e EXP_DIR] [--xxx.yyy zzz ...]
 ```
 
 - This repo uses the [🤗 Accelerate](https://huggingface.co/docs/accelerate/index) library for multi-GPUs/fp16 supports. Please read the [documentation](https://huggingface.co/docs/accelerate/basic_tutorials/launch#using-accelerate-launch) on how to launch the scripts on different platforms.
@@ -19,7 +19,7 @@ accelerate-launch train.py [-c CONFIG] [-e EXP_DIR] [--xxx.yyy zzz ...]
 For example, to train on CelebA with default settings:
 
 ```shell
-accelerate-launch train.py -c ./configs/vae-celeba.yaml
+accelerate-launch train_vae.py -c ./configs/vae-celeba.yaml
 ```
 
 <br/>
@@ -29,17 +29,17 @@ accelerate-launch train.py -c ./configs/vae-celeba.yaml
 ## Sampling
 
 ```shell
-python sample.py -c CONFIG \
-                 [--seed SEED] \
-                 [--mode {sample,interpolate,traverse}] \
-                 --weights WEIGHTS \
-                 --n_samples N_SAMPLES \
-                 --save_dir SAVE_DIR \
-                 [--batch_size BATCH_SIZE] \
-                 [--n_interpolate N_INTERPOLATE] \
-                 [--n_traverse N_TRAVERSE] \
-                 [--traverse_range TRAVERSE_RANGE] 
-                 [--traverse_dim TRAVERSE_DIM]
+python sample_vae.py -c CONFIG \
+                     [--seed SEED] \
+                     [--mode {sample,interpolate,traverse}] \
+                     --weights WEIGHTS \
+                     --n_samples N_SAMPLES \
+                     --save_dir SAVE_DIR \
+                     [--batch_size BATCH_SIZE] \
+                     [--n_interpolate N_INTERPOLATE] \
+                     [--n_traverse N_TRAVERSE] \
+                     [--traverse_range TRAVERSE_RANGE] \
+                     [--traverse_dim TRAVERSE_DIM]
 ```
 
 - Choose a sampling mode by `--mode MODE`, the options are:
