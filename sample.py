@@ -25,7 +25,7 @@ def get_parser():
     )
     parser.add_argument(
         '--mode', type=str, default='sample',
-        choices=['sample', 'interpolate', 'traverse', 'reconstruct'],
+        choices=['sample', 'interpolate', 'traverse', 'reconstruct', 'visualize_latent'],
         help='Choose a sample mode',
     )
     parser.add_argument(
@@ -187,6 +187,32 @@ def main():
                 )
                 idx += 1
 
+    @accelerator.on_main_process
+    @torch.no_grad()
+    def visualize_latent():
+        import matplotlib.pyplot as plt
+        if conf.encoder.params.z_dim != 2:
+            raise ValueError('Latent dimension must be 2')
+        dataset = instantiate_from_config(conf.data, split='test')
+        dataset = Subset(dataset, torch.randperm(len(dataset))[:args.n_samples])
+        dataloader = DataLoader(
+            dataset=dataset, batch_size=args.batch_size,
+            shuffle=False, drop_last=False, **conf.dataloader,
+        )
+        fig, ax = plt.subplots()
+        latents = [[] for _ in range(10)]
+        os.makedirs(args.save_dir, exist_ok=True)
+        for x, y in tqdm.tqdm(dataloader):
+            x = x.to(device)
+            mean, _ = encoder(x)
+            for _m, _y in zip(mean, y):
+                latents[_y].append(_m.cpu())
+        latents = [torch.stack(lat) for lat in latents]
+        for i in range(10):
+            ax.scatter(latents[i][:, 0], latents[i][:, 1], color=f'C{i}', label=f'{i}')
+        ax.legend()
+        fig.savefig(os.path.join(args.save_dir, 'latent.png'), bbox_inches='tight')
+
     # START SAMPLING
     logger.info('Start sampling...')
     if args.mode == 'sample':
@@ -197,6 +223,8 @@ def main():
         traverse()
     elif args.mode == 'reconstruct':
         reconstruct()
+    elif args.mode == 'visualize_latent':
+        visualize_latent()
     else:
         raise ValueError(f'Unknown sample mode: {args.mode}')
     logger.info(f'Sampled images are saved to {args.save_dir}')

@@ -34,12 +34,6 @@ Implement VAEs with PyTorch.
     <img src="./assets/vae-celeba-interpolate.png" width=60%/>
 </p>
 
-**Traverse along a dimension (CelebA 64x64)**:
-
-<p align="center">
-  <img src="./assets/vae-celeba-traverse.png" width=60% />
-</p>
-
 
 
 ### $\beta$-VAE
@@ -48,8 +42,6 @@ Implement VAEs with PyTorch.
 
 $\beta$-VAE introduces a hyperparameter $\beta$ to balance the reconstruction term and KL term in the loss function, where $\beta=1$ corresponds to the original VAE. Larger $\beta$ creates a trade-off between reconstruction fidelity and the quality of distanglement within the learnt latent representations.
 
-By traversing along one dimension of the latent code and fixing other dimensions, we can find out which dimension controls what kind of semantic.
-
 **Reconstruction and random samples ($\beta=20$, CelebA 64x64)**:
 
 <p align="center">
@@ -57,12 +49,30 @@ By traversing along one dimension of the latent code and fixing other dimensions
     <img src="./assets/vae-beta20-celeba.png" width=40%/>
 </p>
 
-
-**Traverse along a dimension ($\beta=20$, CelebA 64x64)**:
+**Traverse along a dimension (CelebA 64x64)**:
 
 <p align="center">
-  <img src="./assets/vae-beta20-celeba-traverse.png" width=60% />
+  <img src="./assets/vae-celeba-traverse.png" width=45% />
+  <img src="./assets/vae-beta20-celeba-traverse.png" width=45% />
 </p>
+
+- By traversing along one dimension of the latent code and fixing other dimensions, we can find out which dimension controls what kind of semantic.
+- The images are results of $\beta=0$ (left) and $\beta=20$ (right). It seems that $\beta=20$ has a less entangled representation (but I'm not sure...)
+
+
+
+### MMD-VAE
+
+> Zhao, Shengjia, Jiaming Song, and Stefano Ermon. "Infovae: Information maximizing variational autoencoders." arXiv preprint arXiv:1706.02262 (2017).
+
+**Random samples and latent space visualization (MNIST 32x32, latent_dim=2)**:
+
+<p align="center">
+    <img src="./assets/mmd-vae.png" width=60%/>
+</p>
+
+- Not really sure that MMD-VAE has a better latent space...
+
 
 
 <br/>
@@ -96,7 +106,7 @@ For VAE and $\beta$-VAE:
 ```shell
 python sample.py -c CONFIG \
                  [--seed SEED] \
-                 [--mode {sample,interpolate,traverse}] \
+                 [--mode {sample,interpolate,traverse,reconstruct,visualize_latent}] \
                  --weights WEIGHTS \
                  --n_samples N_SAMPLES \
                  --save_dir SAVE_DIR \
@@ -111,4 +121,5 @@ python sample.py -c CONFIG \
   - `sample` (default): Randomly sample images.
   - `interpolate`: Sample two random images and interpolate between them. Use `--n_interpolate` to specify the number of images in between.
   - `traverse`: Traverse along a specific dimension. Use `--n_traverse` to specify the number of traversed images, `--traverse_range` to specify the traversal range and `--traverse_dim` to specify the traversal dimension.
-
+  - `reconstruct`: Reconstruct the input.
+  - `visualize_latent`: Visualize the latent space. Only valid when z_dim=2.
