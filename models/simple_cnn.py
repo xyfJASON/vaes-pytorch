@@ -49,14 +49,14 @@ class Encoder(nn.Module):
             nn.Linear(cur_dim, cur_dim // 2),
             nn.BatchNorm1d(cur_dim // 2),
             nn.LeakyReLU(),
-            nn.Linear(cur_dim // 2, z_dim)
+            nn.Linear(cur_dim // 2, z_dim),
         )
         self.fc_logvar = nn.Sequential(
             nn.Flatten(),
             nn.Linear(cur_dim, cur_dim // 2),
             nn.BatchNorm1d(cur_dim // 2),
             nn.LeakyReLU(),
-            nn.Linear(cur_dim // 2, z_dim)
+            nn.Linear(cur_dim // 2, z_dim),
         )
 
         self.apply(init_weights(init_type))

@@ -7,6 +7,7 @@ import torch
 import accelerate
 import torch.nn as nn
 from torchvision.utils import save_image
+from torch.utils.data import DataLoader, Subset
 
 from utils.logger import get_logger
 from utils.misc import instantiate_from_config, amortize
@@ -24,7 +25,7 @@ def get_parser():
     )
     parser.add_argument(
         '--mode', type=str, default='sample',
-        choices=['sample', 'interpolate', 'traverse'],
+        choices=['sample', 'interpolate', 'traverse', 'reconstruct'],
         help='Choose a sample mode',
     )
     parser.add_argument(
@@ -163,6 +164,29 @@ def main():
                 )
                 idx += 1
 
+    @accelerator.on_main_process
+    @torch.no_grad()
+    def reconstruct():
+        dataset = instantiate_from_config(conf.data, split='test')
+        dataset = Subset(dataset, torch.randperm(len(dataset))[:args.n_samples])
+        dataloader = DataLoader(
+            dataset=dataset, batch_size=args.batch_size,
+            shuffle=False, drop_last=False, **conf.dataloader,
+        )
+        idx = 0
+        os.makedirs(args.save_dir, exist_ok=True)
+        for x in tqdm.tqdm(dataloader):
+            x = x[0].to(device) if isinstance(x, (tuple, list)) else x.to(device)
+            mean, logvar = encoder(x)
+            z = mean + torch.randn_like(mean) * torch.exp(0.5 * logvar)
+            recx = decoder(z)
+            for _x, _recx in zip(x, recx):
+                save_image(
+                    [_x, _recx], os.path.join(args.save_dir, f'{idx}.png'),
+                    nrow=2, normalize=True, range=(-1, 1),
+                )
+                idx += 1
+
     # START SAMPLING
     logger.info('Start sampling...')
     if args.mode == 'sample':
@@ -171,6 +195,8 @@ def main():
         interpolate()
     elif args.mode == 'traverse':
         traverse()
+    elif args.mode == 'reconstruct':
+        reconstruct()
     else:
         raise ValueError(f'Unknown sample mode: {args.mode}')
     logger.info(f'Sampled images are saved to {args.save_dir}')

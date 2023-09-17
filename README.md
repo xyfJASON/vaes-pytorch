@@ -21,16 +21,23 @@ Implement VAEs with PyTorch.
 
 > Kingma, Diederik P., and Max Welling. "Auto-encoding variational bayes." *arXiv preprint arXiv:1312.6114* (2013).
 
-**Random samples and interpolation (CelebA 64x64)**:
+**Reconstruction and random samples (CelebA 64x64)**:
 
 <p align="center">
-    <img src="./assets/vae-celeba.png" width=20%/>
+    <img src="./assets/vae-celeba-reconstruct.png" width=20%/>
+    <img src="./assets/vae-celeba.png" width=40%/>
+</p>
+
+**Interpolation in latent space (CelebA 64x64)**:
+
+<p align="center">
     <img src="./assets/vae-celeba-interpolate.png" width=60%/>
 </p>
+
 **Traverse along a dimension (CelebA 64x64)**:
 
 <p align="center">
-  <img src="./assets/vae-celeba-traverse.png" width=70% />
+  <img src="./assets/vae-celeba-traverse.png" width=60% />
 </p>
 
 
@@ -43,12 +50,19 @@ $\beta$-VAE introduces a hyperparameter $\beta$ to balance the reconstruction te
 
 By traversing along one dimension of the latent code and fixing other dimensions, we can find out which dimension controls what kind of semantic.
 
-**Traverse along a dimension for $\beta=20$ (CelebA 64x64)**:
+**Reconstruction and random samples ($\beta=20$, CelebA 64x64)**:
 
 <p align="center">
-    <img src="./assets/vae-beta20-celeba-traverse.png" width=70%/>
+    <img src="./assets/vae-beta20-celeba-reconstruct.png" width=20%/>
+    <img src="./assets/vae-beta20-celeba.png" width=40%/>
 </p>
 
+
+**Traverse along a dimension ($\beta=20$, CelebA 64x64)**:
+
+<p align="center">
+  <img src="./assets/vae-beta20-celeba-traverse.png" width=60% />
+</p>
 
 
 <br/>
@@ -80,17 +94,17 @@ accelerate-launch train_vae.py [-c CONFIG] [-e EXP_DIR] --train.coef_kl [BETA]
 For VAE and $\beta$-VAE:
 
 ```shell
-python sample_vae.py -c CONFIG \
-                     [--seed SEED] \
-                     [--mode {sample,interpolate,traverse}] \
-                     --weights WEIGHTS \
-                     --n_samples N_SAMPLES \
-                     --save_dir SAVE_DIR \
-                     [--batch_size BATCH_SIZE] \
-                     [--n_interpolate N_INTERPOLATE] \
-                     [--n_traverse N_TRAVERSE] \
-                     [--traverse_range TRAVERSE_RANGE] \
-                     [--traverse_dim TRAVERSE_DIM]
+python sample.py -c CONFIG \
+                 [--seed SEED] \
+                 [--mode {sample,interpolate,traverse}] \
+                 --weights WEIGHTS \
+                 --n_samples N_SAMPLES \
+                 --save_dir SAVE_DIR \
+                 [--batch_size BATCH_SIZE] \
+                 [--n_interpolate N_INTERPOLATE] \
+                 [--n_traverse N_TRAVERSE] \
+                 [--traverse_range TRAVERSE_RANGE] \
+                 [--traverse_dim TRAVERSE_DIM]
 ```
 
 - Choose a sampling mode by `--mode MODE`, the options are:
