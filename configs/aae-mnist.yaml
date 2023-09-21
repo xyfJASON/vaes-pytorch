@@ -1,0 +1,59 @@
+seed: 8888
+
+data:
+  target: datasets.mnist.MNIST
+  params:
+    root: ~/data/MNIST/
+    img_size: 32
+    split: train
+
+dataloader:
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+
+encoder:
+  target: models.simple_cnn.Encoder
+  params:
+    z_dim: 2
+    in_dim: 1
+    dim: 32
+    dim_mults: [1, 2, 4]
+    with_bn: true
+
+decoder:
+  target: models.simple_cnn.Decoder
+  params:
+    z_dim: 2
+    dim: 32
+    dim_mults: [4, 2, 1]
+    out_dim: 1
+    with_bn: true
+    with_tanh: true
+
+discriminator:
+  target: models.simple_mlp.MLP
+  params:
+    in_dim: 2
+    out_dim: 1
+    dim: 32
+    dim_mults: [1, 1]
+    with_bn: false
+
+train:
+  n_steps: 10000
+  batch_size: 256
+  resume: ~
+  print_freq: 100
+  sample_freq: 100
+  save_freq: 10000
+  n_samples: 64
+
+  optim:
+    target: torch.optim.Adam
+    params:
+      lr: 0.001
+  optim_disc:
+    target: torch.optim.Adam
+    params:
+      lr: 0.001

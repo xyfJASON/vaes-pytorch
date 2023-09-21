@@ -6,73 +6,110 @@ Implement VAEs with PyTorch.
 
 ## Progress
 
-- [x] VAE
-- [x] $\beta$-VAE
+- [x] [VAE](https://arxiv.org/abs/1312.6114)
+- [x] [beta-VAE](https://openreview.net/forum?id=Sy2fzU9gl)
+- [x] [AAE](http://arxiv.org/abs/1511.05644)
+- [x] [MMD-VAE](https://arxiv.org/abs/1706.02262)
 
 <br/>
 
 
 
-## Results
+## Latent Space Visualization
+
+To visualize the latent space learned by these models, I train them on **MNIST** dataset with a **2 dimensional latent space**. After training, I encode the data in MNIST test set (10,000 images, 1,000 for each class) using the trained encoder and visualize the latent codes on a 2-D plane, coloured by their labels.
+
+<table style="text-align:center">
+    <tr>
+        <th>AE</th>
+        <th>VAE</th>
+        <th>AAE</th>
+        <th>MMD-VAE</th>
+    </tr>
+    <tr>
+        <td><img src="./assets/ae/mnist-latent.png"/></td>
+        <td><img src="./assets/vae/mnist-latent.png"/></td>
+        <td><img src="./assets/aae/mnist-latent.png"/></td>
+        <td><img src="./assets/mmd-vae/mnist-latent.png"/></td>
+    </tr>
+</table>
+
+- The latent space of AE (autoencoder) is not regularized and is solely learned from reconstructing the data.
+- The latent space of VAE is regularized by $\text{KL}(q_\phi(z\vert x)\Vert p(z))$, which encourages the encoder to map all the input to the same prior distribution (usually the standard normal distribution).
+- The latent space of AAE is regularized by $\text{JS}(q_\phi(z)\Vert p(z))$ via adversarial training. Only the amortized distribution of the latent codes is encouraged to approach the prior distribution.
+- Similar to AAE, MMD-VAE (a special case of InfoVAE) is regularized by $\text{MMD}(q_\phi(z)\Vert p(z))$. However, the latent space distribution does not seem to be as good as AAE.
+
+<br/>
 
 
 
-### VAE
+## Disentanglement Study
 
-> Kingma, Diederik P., and Max Welling. "Auto-encoding variational bayes." *arXiv preprint arXiv:1312.6114* (2013).
+By traversing along one dimension of the latent code while fixing the other dimensions, we can find out which dimension controls which type of semantic attribute. Ideally, in a well-disentangled latent space, each dimension only controls a single type of attribute, such as smiling, wearing glasses, hue, etc.
 
-**Reconstruction and random samples (CelebA 64x64)**:
-
-<p align="center">
-    <img src="./assets/vae-celeba-reconstruct.png" width=20%/>
-    <img src="./assets/vae-celeba.png" width=40%/>
+<table style="text-align:center">
+    <tr>
+        <th>VAE</th>
+        <th>beta-VAE (beta=20)</th>
+    </tr>
+	<tr>
+    	<td><img src="./assets/vae/celeba-traverse.png"/></td>
+        <td><img src="./assets/vae-beta20/celeba-traverse.png"/></td>
+    </tr>
 </p>
+</table>
 
-**Interpolation in latent space (CelebA 64x64)**:
+- beta-VAE introduces a hyperparameter $\beta$ to reweight the reconstruction term and KL term in the VAE loss function, where $\beta=1 $ corresponds to the original VAE. Larger $\beta$ creates a trade-off between reconstruction fidelity and the quality of distanglement within the learned latent representations.
 
-<p align="center">
-    <img src="./assets/vae-celeba-interpolate.png" width=60%/>
-</p>
-
-
-
-### $\beta$-VAE
-
-> Higgins, Irina, Loic Matthey, Arka Pal, Christopher Burgess, Xavier Glorot, Matthew Botvinick, Shakir Mohamed, and Alexander Lerchner. "beta-vae: Learning basic visual concepts with a constrained variational framework." In *International conference on learning representations*. 2016.
-
-$\beta$-VAE introduces a hyperparameter $\beta$ to balance the reconstruction term and KL term in the loss function, where $\beta=1$ corresponds to the original VAE. Larger $\beta$ creates a trade-off between reconstruction fidelity and the quality of distanglement within the learnt latent representations.
-
-**Reconstruction and random samples ($\beta=20$, CelebA 64x64)**:
-
-<p align="center">
-    <img src="./assets/vae-beta20-celeba-reconstruct.png" width=20%/>
-    <img src="./assets/vae-beta20-celeba.png" width=40%/>
-</p>
-
-**Traverse along a dimension (CelebA 64x64)**:
-
-<p align="center">
-  <img src="./assets/vae-celeba-traverse.png" width=45% />
-  <img src="./assets/vae-beta20-celeba-traverse.png" width=45% />
-</p>
-
-- By traversing along one dimension of the latent code and fixing other dimensions, we can find out which dimension controls what kind of semantic.
-- The images are results of $\beta=0$ (left) and $\beta=20$ (right). It seems that $\beta=20$ has a less entangled representation (but I'm not sure...)
+<br/>
 
 
 
-### MMD-VAE
+## Unconditional Image Generation
 
-> Zhao, Shengjia, Jiaming Song, and Stefano Ermon. "Infovae: Information maximizing variational autoencoders." arXiv preprint arXiv:1706.02262 (2017).
 
-**Random samples and latent space visualization (MNIST 32x32, latent_dim=2)**:
 
-<p align="center">
-    <img src="./assets/mmd-vae.png" width=60%/>
-</p>
+### CelebA (64x64)
 
-- Not really sure that MMD-VAE has a better latent space...
+**Reconstruction**:
 
+<table style="text-align:center">
+    <tr>
+        <th>VAE</th>
+        <th>beta-VAE (beta=20)</th>
+    </tr>
+    <tr>
+        <td><img src="./assets/vae/celeba-reconstruct.png" width=50%/></td>
+        <td><img src="./assets/vae-beta20/celeba-reconstruct.png" width=50%/></td>
+    </tr>
+</table>
+
+**Random samples**:
+
+<table style="text-align:center">
+    <tr>
+        <th>VAE</th>
+        <th>beta-VAE (beta=20)</th>
+    </tr>
+    <tr>
+        <td><img src="./assets/vae/celeba.png" width=50%/></td>
+        <td><img src="./assets/vae-beta20/celeba.png" width=50%/></td>
+    </tr>
+</table>
+
+
+**Interpolation**:
+
+<table style="text-align:center">
+    <tr>
+        <th>VAE</th>
+        <th>beta-VAE (beta=20)</th>
+    </tr>
+    <tr>
+        <td><img src="./assets/vae/celeba-interpolate.png"/></td>
+        <td><img src="./assets/vae-beta20/celeba-interpolate.png"/></td>
+    </tr>
+</table>
 
 
 <br/>
@@ -85,6 +122,12 @@ $\beta$-VAE introduces a hyperparameter $\beta$ to balance the reconstruction te
 
 ### Train
 
+For AE:
+
+```shell
+accelerate-launch train_ae.py [-c CONFIG] [-e EXP_DIR]
+```
+
 For VAE:
 
 ```shell
@@ -94,14 +137,26 @@ accelerate-launch train_vae.py [-c CONFIG] [-e EXP_DIR]
 For $\beta$-VAE:
 
 ```shell
-accelerate-launch train_vae.py [-c CONFIG] [-e EXP_DIR] --train.coef_kl [BETA]
+accelerate-launch train_vae.py [-c CONFIG] [-e EXP_DIR] --train.coef_kl {BETA}
+```
+
+For AAE:
+
+```shell
+accelerate-launch train_aae.py [-c CONFIG] [-e EXP_DIR]
+```
+
+For MMD-VAE:
+
+```shell
+accelerate-launch train_mmd_vae.py [-c CONFIG] [-e EXP_DIR]
 ```
 
 
 
 ### Sample
 
-For VAE and $\beta$-VAE:
+For VAE, $\beta$-VAE, AAE and MMD-VAE:
 
 ```shell
 python sample.py -c CONFIG \

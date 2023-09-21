@@ -199,7 +199,10 @@ def main():
             dataset=dataset, batch_size=args.batch_size,
             shuffle=False, drop_last=False, **conf.dataloader,
         )
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(5, 5))
+        ax.set_xlim(-5, 5)
+        ax.set_ylim(-5, 5)
+        ax.set_aspect('equal', adjustable='box')
         latents = [[] for _ in range(10)]
         os.makedirs(args.save_dir, exist_ok=True)
         for x, y in tqdm.tqdm(dataloader):
@@ -209,8 +212,8 @@ def main():
                 latents[_y].append(_m.cpu())
         latents = [torch.stack(lat) for lat in latents]
         for i in range(10):
-            ax.scatter(latents[i][:, 0], latents[i][:, 1], color=f'C{i}', label=f'{i}')
-        ax.legend()
+            ax.scatter(latents[i][:, 0], latents[i][:, 1], color=f'C{i}', label=f'{i}', s=1)
+        ax.legend(loc="upper right")
         fig.savefig(os.path.join(args.save_dir, 'latent.png'), bbox_inches='tight')
 
     # START SAMPLING
